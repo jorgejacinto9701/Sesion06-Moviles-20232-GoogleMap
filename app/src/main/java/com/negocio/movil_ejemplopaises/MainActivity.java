@@ -1,5 +1,6 @@
 package com.negocio.movil_ejemplopaises;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
@@ -12,6 +13,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+
 import com.negocio.movil_ejemplopaises.entity.Pais;
 import com.negocio.movil_ejemplopaises.service.ServicePais;
 import com.negocio.movil_ejemplopaises.util.ConnectionRest;
@@ -24,7 +34,11 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements
+            OnMapReadyCallback,
+            GoogleMap.OnMapClickListener,
+            GoogleMap.OnMapLongClickListener{
 
     Spinner spnRegion;
     ArrayAdapter<String> adaptadorRegion;
@@ -37,10 +51,11 @@ public class MainActivity extends AppCompatActivity {
     ServicePais servicePais;
     List<Pais> paisesTotal = new ArrayList<Pais>();
 
-    TextView txtCapital, txtMoneda, txtLanguaje, txtPoblacion;
+    TextView txtCapital, txtLatitud, txtLongitud, txtPoblacion;
     ImageView imgPais;
 
     Context context;
+    GoogleMap mMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +65,8 @@ public class MainActivity extends AppCompatActivity {
         context = this;
 
         txtCapital = findViewById(R.id.txtCapital);
-        txtMoneda = findViewById(R.id.txtMoneda);
-        txtLanguaje = findViewById(R.id.txtLenguaje);
+        txtLatitud = findViewById(R.id.txtLatitud);
+        txtLongitud = findViewById(R.id.txtLongitud);
         txtPoblacion = findViewById(R.id.txtPoblacion);
         imgPais = findViewById(R.id.imgPais);
 
@@ -115,6 +130,12 @@ public class MainActivity extends AppCompatActivity {
                   if (optPais.isPresent()){
                       txtCapital.setText("Capital : " + optPais.get().getCapital());
                       txtPoblacion.setText("Población : " + optPais.get().getPopulation());
+                      txtLatitud.setText("Latitud : " + optPais.get().getLatlng().get(0));
+                      txtLongitud.setText("Longitud : " + optPais.get().getLatlng().get(1));
+
+                      LatLng pais = new LatLng(optPais.get().getLatlng().get(0),optPais.get().getLatlng().get(1));
+                      mMap.addMarker(new MarkerOptions().position(pais).title(optPais.get().getName()));
+                      mMap.moveCamera(CameraUpdateFactory.newLatLng(pais));
 
                       Glide.with(context).load(optPais.get().getFlags().getPng()).into(imgPais);
                   }
@@ -124,5 +145,35 @@ public class MainActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
+
+       SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+       mapFragment.getMapAsync(this);
+
     }
+
+
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        mMap = googleMap;
+        this.mMap.setOnMapClickListener(this);
+        this.mMap.setOnMapLongClickListener(this);
+    }
+
+    @Override
+    public void onMapClick(@NonNull LatLng latLng) {
+        mMap.clear();
+        LatLng nuevo = new LatLng(latLng.latitude,latLng.longitude);
+        mMap.addMarker(new MarkerOptions().position(nuevo).title(""));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(nuevo));
+    }
+
+    @Override
+    public void onMapLongClick(@NonNull LatLng latLng) {
+        mMap.clear();
+        LatLng nuevo = new LatLng(latLng.latitude,latLng.longitude);
+        mMap.addMarker(new MarkerOptions().position(nuevo).title(""));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(nuevo));
+    }
+
+
 }

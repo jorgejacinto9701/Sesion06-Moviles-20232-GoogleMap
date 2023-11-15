@@ -1,5 +1,7 @@
 package com.negocio.movil_ejemplopaises.entity;
 
+import java.util.List;
+
 public class Pais {
 
     private String name;
@@ -7,6 +9,7 @@ public class Pais {
     private String region;
     private Long population;
     private Flag flags;
+    private List<Double> latlng;
 
     public Flag getFlags() {
         return flags;
@@ -46,5 +49,13 @@ public class Pais {
 
     public void setPopulation(Long population) {
         this.population = population;
+    }
+
+    public List<Double> getLatlng() {
+        return latlng;
+    }
+
+    public void setLatlng(List<Double> latlng) {
+        this.latlng = latlng;
     }
 }
